@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Category;
 
 class CategoryController extends Controller
 {
@@ -14,7 +14,11 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        echo "funciona";
+        $categories = \DB::table('categories')->orderBy('id', 'desc')->get();
+
+        return response()->json([
+            'categories' => $categories
+        ]);
     }
 
     /**
@@ -35,7 +39,38 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        //recibo los datos
+        $json = $request->input('json', null);
+        $params = json_decode($json);
+        $params_array = json_decode($json, true);
+        //validar los datos
+        $validate = \Validator::make($params_array, [
+            'category'     => 'required|unique:categories',
+        ]);
+
+        if ($validate->fails()) {
+            $data = [
+                'status'    => 'error',
+                'code'      => 404,
+                'message'   => 'Registro invalido',
+                'errors'    => $validate->errors()
+            ];
+        }else{
+
+            $categortnew = new Category();
+            $categortnew->category = $params_array['category'];
+            
+            $categortnew->save();
+
+            $data = [
+                'status'    => 'success',
+                'code'      => 200,
+                'message'   => 'Registro exitoso',
+                'user'      => $categortnew
+            ];
+        }
+
+        return response()->json($data, 200);
     }
 
     /**
