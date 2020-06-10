@@ -38,7 +38,48 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        //recibo los datos
+        $json = $request->input('json', null);
+        $params = json_decode($json);
+        $params_array = json_decode($json, true);
+        //validar los datos
+        $validate = \Validator::make($params_array, [
+            'name'     => 'required|unique:products',
+            'reference'  => 'required|unique:products',
+            'price' => 'required|integer',
+            'size' => 'required',
+            'stock' => 'required|integer'
+        ]);
+
+        if ($validate->fails()) {
+            $data = [
+                'status'    => 'error',
+                'code'      => 404,
+                'message'   => 'Registro invalido',
+                'errors'    => $validate->errors()
+            ];
+        }else{
+
+            $product = new Product();
+            $product->category_id = $params_array['category'];
+            $product->name = $params_array['name'];
+            $product->reference = $params_array['reference'];
+            $product->price = $params_array['price'];
+            $product->size = $params_array['size'];
+            $product->stock = $params_array['stock'];
+            $product->status = 1;
+            
+            $product->save();
+
+            $data = [
+                'status'    => 'success',
+                'code'      => 200,
+                'message'   => 'Registro exitoso',
+                'user'      => $product
+            ];
+        }
+
+        return response()->json($data, 200);
     }
 
     /**
