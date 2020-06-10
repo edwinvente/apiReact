@@ -18,4 +18,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+//rutas de las categorias
+
+
+//ruta de prueba
 Route::get('/test', 'CategoryController@index');
