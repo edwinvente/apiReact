@@ -28,5 +28,8 @@ Route::get('/products', 'ProductController@index');
 Route::post('/products/store', 'ProductController@store');
 Route::post('/products/update', 'ProductController@update');
 
+//rutas de las ventas
+Route::get('/sales', 'SaleController@index');
+
 //ruta de prueba
 Route::get('/test', 'CategoryController@index');
