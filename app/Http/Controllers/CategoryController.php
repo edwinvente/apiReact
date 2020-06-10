@@ -59,6 +59,7 @@ class CategoryController extends Controller
 
             $categortnew = new Category();
             $categortnew->category = $params_array['category'];
+            $categortnew->status = 1;
             
             $categortnew->save();
 
@@ -102,9 +103,41 @@ class CategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        //
+        //recibo los datos
+        $json = $request->input('json', null);
+        $params = json_decode($json);
+        $params_array = json_decode($json, true);
+        //validar los datos
+        $validate = \Validator::make($params_array, [
+            'category'     => 'required',
+        ]);
+
+        if ($validate->fails()) {
+            $data = [
+                'status'    => 'error',
+                'code'      => 404,
+                'message'   => 'Registro invalido',
+                'errors'    => $validate->errors()
+            ];
+        }else{
+
+            $categortupdate = Category::find($params_array['id']);
+            $categortupdate->category = $params_array['category'];
+            $categortupdate->status = $params_array['status'];
+            
+            $categortupdate->update();
+
+            $data = [
+                'status'    => 'success',
+                'code'      => 200,
+                'message'   => 'Registro actualizado',
+                'user'      => $categortupdate
+            ];
+        }
+
+        return response()->json($data, 200);
     }
 
     /**
