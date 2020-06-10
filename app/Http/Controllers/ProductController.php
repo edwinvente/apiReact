@@ -111,9 +111,49 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        //
+        //recibo los datos
+        $json = $request->input('json', null);
+        $params = json_decode($json);
+        $params_array = json_decode($json, true);
+        //validar los datos
+        $validate = \Validator::make($params_array, [
+            'name'     => 'required',
+            'reference'  => 'required',
+            'price' => 'required|integer',
+            'size' => 'required',
+        ]);
+
+        if ($validate->fails()) {
+            $data = [
+                'status'    => 'error',
+                'code'      => 404,
+                'message'   => 'Registro invalido',
+                'errors'    => $validate->errors()
+            ];
+        }else{
+
+            $product = Product::find($params_array['id']);
+            $product->category_id = $params_array['category'];
+            $product->name = $params_array['name'];
+            $product->reference = $params_array['reference'];
+            $product->price = $params_array['price'];
+            $product->size = $params_array['size'];
+            $product->stock = $params_array['stock'];
+            $product->status = $params_array['status'];
+            
+            $product->update();
+
+            $data = [
+                'status'    => 'success',
+                'code'      => 200,
+                'message'   => 'Registro actualizado',
+                'user'      => $product
+            ];
+        }
+
+        return response()->json($data, 200);
     }
 
     /**

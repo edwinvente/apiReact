@@ -26,6 +26,7 @@ Route::post('/categories/update', 'CategoryController@update');
 //rutas de los productos
 Route::get('/products', 'ProductController@index');
 Route::post('/products/store', 'ProductController@store');
+Route::post('/products/update', 'ProductController@update');
 
 //ruta de prueba
 Route::get('/test', 'CategoryController@index');
