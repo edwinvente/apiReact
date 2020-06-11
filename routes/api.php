@@ -30,6 +30,7 @@ Route::post('/products/update', 'ProductController@update');
 
 //rutas de las ventas
 Route::get('/sales', 'SaleController@index');
+Route::post('/sales/store', 'SaleController@store');
 
 //ruta de prueba
 Route::get('/test', 'CategoryController@index');

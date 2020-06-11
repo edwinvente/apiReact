@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Sale;
+use App\Detail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SaleController extends Controller
 {
@@ -14,8 +16,10 @@ class SaleController extends Controller
      */
     public function index()
     {
-        $sales = Sale::orderBy('id', 'desc')->get();
+        //$sales = Sale::orderBy('id', 'desc')->get();
         
+        $sales = DB::select(DB::raw("SELECT s.status, s.price, s.created_at, c.name, c.phone, @compras:=(SELECT COALESCE(SUM(price), 0) FROM sales WHERE client_id = 1) AS compras FROM sales s INNER JOIN clients c ON s.client_id = c.id"));
+
         $records = count($sales);
 
         $data = [
@@ -47,7 +51,44 @@ class SaleController extends Controller
      */
     public function store(Request $request)
     {
+        $json = $request->input('json', null);
+        $params = json_decode($json);
+        $params_array = json_decode($json, true);
+
+        //validar los datos
+        $validate = \Validator::make($params_array, [
+            'client_id'     => 'required|integer',
+            'status'  => 'required',
+            'price' => 'required|integer',
+        ]);
+
+
+        $sale = new Sale();
+        $sale->client_id = 1;
+        $sale->status = 1;
+        $sale->price = $params_array['price'];
         
+        if ($sale->save()) {
+            foreach ($params_array["poducts"] as $key) {
+                Detail::create([
+                    'product_id' => $key['id'],
+                    'sale_id'  => $sale->id,
+                    'quantity' => $key['cantidad'], // or  $key . 'st array';
+                ]);
+            }
+        }
+
+
+        $data = [
+            'status'    => 'success',
+            'code'      => 200,
+            'message'   => 'Venta exitosa',
+            'products'    => $params_array
+        ];
+
+        /* $params_array["poducts"] */
+
+        return response()->json($data, 200);
     }
 
     /**
